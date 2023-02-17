@@ -1,0 +1,9 @@
+cd server
+npm init -y
+npm install express mysql body-parser cors
+npm install -D nodemon
+npm install dotenv
+npm run dev
+
+"mysql pasword"
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '<password>';
