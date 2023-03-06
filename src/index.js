@@ -1,49 +1,51 @@
 //* Requirement dependencies
-const express = require("express"); //todo server asaah
-
-//* DataBase iig export hiih
-const database = require("./config/database");
-// const bodyParser = require("body-parser");
+const express = require("express");
 const cors = require("cors");
+const database = require("./config/database");
 require("dotenv").config();
-
-//* Main server application
 
 const app = express();
 
-//* Main server configuration
 app.use(express.json());
 app.use(cors());
 
-app.post("/user", (request, response) => {
+app.post("/signin", (request, response) => {
   const { username, password } = request.body;
-  database.query("SELECT * FROM user LIMIT 1", (err, result) => {
-    if (err) throw err;
+  database.query(
+    `SELECT * FROM registration WHERE name = '${username}' LIMIT 1`,
+    (err, result) => {
+      if (err) throw err;
 
-    _username = result[0].name;
-    _password = result[0].password;
+      if (result.length != 0 && result != null) {
+        _username = result[0].name;
+        _password = result[0].password;
 
-    if (username == _username && password == _password) {
-      response.json({ type: "success" });
-    } else {
-      response.json({ type: "failed" });
+        if (username == _username && password == _password) {
+          response.json({ type: "success" });
+        } else {
+          response.json({ type: "failed" });
+        }
+      } else {
+        response.json({ type: "user not found" });
+      }
     }
-  });
+  );
 });
-// app.use(express.json());
+
+app.post("/signup", async (request, response) => {
+  const { username, password } = request.body;
+  await database.query(
+    `INSERT INTO registration (name, password) VALUES ('${username}', '${password}');`,
+    (err) => {
+      if (err) throw err;
+    }
+  );
+
+  await response.json({ type: "success" });
+});
 
 //* Server listen on port
-
-// app.listen(3003, () => {
-//   console.log("Server listening on 3003 PORT...");
-// });
-
 const port = process.env.PORT;
 app.listen(port, () => {
-  console.log("Server listening on" + port);
+  console.log("Server listening on " + port);
 });
-
-// const port = process.env.PORT;
-// server.listen(port, () => {
-//     console.log("Server listening on " + port);
-// });

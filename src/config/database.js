@@ -8,7 +8,6 @@ const database = mysql.createConnection({
     database: process.env.DB_BASE,
 });
 
-//* holboh uildel
 database.connect((err) => {
     if (err) throw err;
 
