@@ -2,6 +2,10 @@
 const express = require("express");
 const cors = require("cors");
 const database = require("./config/database");
+const bcrypt = require("bcrypt");
+const { v4: uuid } = require("uuid");
+const errorHandling = require("./helper/errorHandling");
+const generatePassword = require("./helper/password");
 require("dotenv").config();
 
 const app = express();
@@ -9,18 +13,27 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.post("/signin", (request, response) => {
+app.post("/signin", (request, response, next) => {
   const { username, password } = request.body;
+
   database.query(
     `SELECT * FROM registration WHERE name = '${username}' LIMIT 1`,
-    (err, result) => {
-      if (err) throw err;
+    async (err, result) => {
+      if (err) {
+        next(err);
+
+        return;
+      }
 
       if (result.length != 0 && result != null) {
         _username = result[0].name;
         _password = result[0].password;
 
-        if (username == _username && password == _password) {
+        const login = await bcrypt.compare(password, _password);
+
+        console.log(login);
+
+        if (username == _username && login) {
           response.json({ type: "success" });
         } else {
           response.json({ type: "failed" });
@@ -32,17 +45,22 @@ app.post("/signin", (request, response) => {
   );
 });
 
-app.post("/signup", async (request, response) => {
+app.post("/signup", async (request, response, next) => {
   const { username, password } = request.body;
+
+  const hash = await generatePassword(password, 10);
+
   await database.query(
-    `INSERT INTO registration (name, password) VALUES ('${username}', '${password}');`,
+    `INSERT INTO registration ( name, password, account_id) VALUES ('${username}', '${hash}', '${uuid()}');`,
     (err) => {
-      if (err) throw err;
+      if (err) next(err);
     }
   );
 
   await response.json({ type: "success" });
 });
+
+app.use(errorHandling);
 
 //* Server listen on port
 const port = process.env.PORT;

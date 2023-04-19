@@ -1,39 +1,10 @@
-const generatePassword = (password, key) => {
-  const upperPassword = password.toUpperCase;
-  let words = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-  ];
+const bcrypt = require("bcrypt");
 
-  for (let index = 0; index < upperPassword.length; index++) {
-    console.log(upperPassword[index]);
-  }
+const generatePassword = async (password, key) => {
+    const salt = await bcrypt.genSalt(key);
+    const hash = await bcrypt.hash(password, salt);
 
-  console.log(result);
+    return await hash;
 };
 
-generatePassword("passs", 9);
+module.exports = generatePassword;
